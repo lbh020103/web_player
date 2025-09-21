@@ -13,7 +13,7 @@ export default function Page() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
 
-  const [frequency, setFrequency] = useState(100)
+  const DEFAULT_FREQ = 100
   const [task, setTask] = useState<Task>(1)
   const [ratioLeft, setRatioLeft] = useState(30)
   const [ratioRight, setRatioRight] = useState(30)
@@ -118,10 +118,10 @@ export default function Page() {
       }
 
       // Generate sine overlays per channel
-      const leftFreq = frequency
+      const leftFreq = DEFAULT_FREQ
       const rightOffsetForTask = (t: Task) => (t === 1 ? 10.5 : t === 2 ? 22 : 0)
-      const rightFreq1 = frequency + (task === 3 ? 5.5 : rightOffsetForTask(task))
-      const rightFreq2 = task === 3 ? frequency + 1.75 : rightFreq1
+      const rightFreq1 = DEFAULT_FREQ + (task === 3 ? 5.5 : rightOffsetForTask(task))
+      const rightFreq2 = task === 3 ? DEFAULT_FREQ + 1.75 : rightFreq1
 
       // Convert amplitude percent to linear using same db mapping as get_percent_volume
       const quietDb = -70
@@ -194,7 +194,7 @@ export default function Page() {
     <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#0f172a' }}>
       <div style={{ width: 680, background: 'white', borderRadius: 12, padding: 24, boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
         <h1 style={{ margin: 0, fontSize: 22 }}>Web Audio Processor</h1>
-        <p style={{ color: '#475569', marginTop: 6 }}>Upload WAV/MP3, set Frequency/Task/Amplitude, then Play/Stop</p>
+        <p style={{ color: '#475569', marginTop: 6 }}>Upload WAV/MP3, choose Task and Amplitude, then Play/Stop</p>
 
         {/* File picker */}
         <div style={{ marginTop: 16 }}>
@@ -205,14 +205,7 @@ export default function Page() {
           {fileName && <span style={{ marginLeft: 12, color: '#334155' }}>{fileName}</span>}
         </div>
 
-        {/* Frequency */}
-        <div style={{ marginTop: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ fontWeight: 600 }}>Frequency</span>
-            <span>{frequency} Hz</span>
-          </div>
-          <input type="range" min={80} max={210} step={1} value={frequency} onChange={(e) => setFrequency(parseInt(e.target.value))} style={{ width: '100%' }} />
-        </div>
+        {/* Frequency removed; using default base frequency of 100 Hz */}
 
         {/* Task */}
         <div style={{ marginTop: 16 }}>
