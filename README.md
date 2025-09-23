@@ -45,7 +45,7 @@ Open http://localhost:3000
 
 ## Processing Details
 
-- Duration: Input is looped/trimmed to 60 seconds
+- Duration: Input is looped/trimmed to 10 minitues
 - Normalization: Each channel is normalized to approximately -10 dBFS
 - Left Channel: Base sine at 100 Hz overlaid
 - Right Channel: Sine overlays with task-dependent offsets (see above)

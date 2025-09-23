@@ -17,6 +17,7 @@ export default function Page() {
   const [task, setTask] = useState<Task>(1)
   const [ratioLeft, setRatioLeft] = useState(30)
   const [ratioRight, setRatioRight] = useState(30)
+  const [soloSine, setSoloSine] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -87,7 +88,7 @@ export default function Page() {
       const srcL = decoded.getChannelData(0)
       const srcR = decoded.numberOfChannels > 1 ? decoded.getChannelData(1) : decoded.getChannelData(0)
 
-      // Build a 60s buffer, repeat or trim like read_music(duration=1)
+      // Build a 10 mins buffer, repeat or trim like read_music(duration=1)
       const targetLen = 600 * sampleRate
       const inLen = decoded.length
       const outLen = targetLen
@@ -99,7 +100,7 @@ export default function Page() {
         baseR[i] = srcR[si]
       }
 
-      // Normalize to about -10 dBFS
+      // Normalize music to about -14 dBFS for headroom
       const rms = (arr: Float32Array) => {
         let s = 0
         for (let i = 0; i < arr.length; i++) s += arr[i] * arr[i]
@@ -110,11 +111,25 @@ export default function Page() {
         const gDb = targetDb - dbfs(rms(arr))
         return Math.pow(10, gDb / 20)
       }
-      const gainL = gainForTarget(baseL, -10)
-      const gainR = gainForTarget(baseR, -10)
+      const gainL = gainForTarget(baseL, -14)
+      const gainR = gainForTarget(baseR, -14)
       for (let i = 0; i < outLen; i++) {
         baseL[i] *= gainL
         baseR[i] *= gainR
+      }
+
+      // Optional ducking of music (about -6 dB) to make space for tone
+      const duckGain = Math.pow(10, -6 / 20)
+      if (!soloSine) {
+        for (let i = 0; i < outLen; i++) {
+          baseL[i] *= duckGain
+          baseR[i] *= duckGain
+        }
+      } else {
+        for (let i = 0; i < outLen; i++) {
+          baseL[i] = 0
+          baseR[i] = 0
+        }
       }
 
       // Generate sine overlays per channel
@@ -123,9 +138,9 @@ export default function Page() {
       const rightFreq1 = DEFAULT_FREQ + (task === 3 ? 5.5 : rightOffsetForTask(task))
       const rightFreq2 = task === 3 ? DEFAULT_FREQ + 1.75 : rightFreq1
 
-      // Convert amplitude percent to linear using same db mapping as get_percent_volume
-      const quietDb = -70
-      const targetDbFromPercent = (p: number) => quietDb * (100 - p) / 100
+      // Convert amplitude percent to linear using louder mapping for audibility
+      // Map 0..100% to -40 dBFS .. -10 dBFS
+      const targetDbFromPercent = (p: number) => -40 + (p / 100) * 30
       const ampFromDb = (db: number) => Math.pow(10, db / 20)
       const leftAmp = ampFromDb(targetDbFromPercent(ratioLeft))
       const rightAmp = ampFromDb(targetDbFromPercent(ratioRight))
@@ -242,6 +257,14 @@ export default function Page() {
               </select>
             </div>
           </div>
+        </div>
+
+        {/* Options */}
+        <div style={{ marginTop: 12 }}>
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <input type="checkbox" checked={soloSine} onChange={(e) => setSoloSine(e.target.checked)} />
+            Solo Sine (mute music to verify tone)
+          </label>
         </div>
 
         {/* Actions */}
