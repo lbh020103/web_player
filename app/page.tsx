@@ -88,7 +88,7 @@ export default function Page() {
       const srcR = decoded.numberOfChannels > 1 ? decoded.getChannelData(1) : decoded.getChannelData(0)
 
       // Build a 60s buffer, repeat or trim like read_music(duration=1)
-      const targetLen = 60 * sampleRate
+      const targetLen = 600 * sampleRate
       const inLen = decoded.length
       const outLen = targetLen
       const baseL = new Float32Array(outLen)
