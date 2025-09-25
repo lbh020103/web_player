@@ -34,7 +34,7 @@ Open http://localhost:3000
 3) Set Amplitudes (Left/Right)
 - Options match the mobile app
 - Amplitude mapping follows the Python logic:
-  - quiet_db = -70 dB
+  - quiet_db = -70 dB 
   - target_db = quiet_db * (100 - p) / 100
   - linear gain = 10^(target_db/20)
 

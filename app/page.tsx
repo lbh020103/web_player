@@ -164,14 +164,17 @@ export default function Page() {
       const rightFreq1 = baseFreq + (task === 3 ? 5.5 : rightOffsetForTask(task))
       const rightFreq2 = task === 3 ? baseFreq + 1.75 : rightFreq1
 
-      // Parity with Python get_percent_volume: quiet_db = -70; target_db = quiet_db * (100 - p) / 100
-      const targetDbFromPercent = (p: number) => {
-        const quietDb = -70
-        return quietDb * (100 - p) / 100
+      // Mix method to avoid clipping: scale music, set sine relative to it (user request)
+      const mixMusicGain = 0.5 // halve music level before mixing
+      if (!soloSine) {
+        for (let i = 0; i < outLen; i++) {
+          baseL[i] *= mixMusicGain
+          baseR[i] *= mixMusicGain
+        }
       }
-      const ampFromDb = (db: number) => Math.pow(10, db / 20)
-      const leftAmp = ampFromDb(targetDbFromPercent(ratioLeft))
-      const rightAmp = ampFromDb(targetDbFromPercent(ratioRight))
+      // Sine magnitude as a ratio of music gain (0..1)
+      const leftAmp = (ratioLeft / 100) * mixMusicGain
+      const rightAmp = (ratioRight / 100) * mixMusicGain
 
       const outL = new Float32Array(outLen)
       const outR = new Float32Array(outLen)
@@ -227,11 +230,7 @@ export default function Page() {
     }
   }
 
-  const amplitudeOptions = () => {
-    if (task === 1) return [70, 85, 100]
-    if (task === 2) return [40, 55, 70]
-    return [10, 25, 40]
-  }
+  const amplitudeOptions = () => [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
   // const amplitudeOptions = () => [0, 50, 100]
 
   return (
